@@ -40,3 +40,9 @@ class ConverterEngine:
                 {html_content}
             </body>
             </html>"""
+
+    def convert_to_pdf(self, output_pdf_path: str, style: str = "monokai"):
+        html_content = self.convert_to_html()
+        full_html = self.wrap_html(html_content, style)
+        HTML(string=full_html).write_pdf(output_pdf_path,
+                                         stylesheets=[CSS(string=self.get_theme_css(style))])
