@@ -1,2 +1,9 @@
+# Python bytecode files
 __pycache__/*
 *.pyc
+
+# build files 
+build/
+dist/
+main.spec
+
