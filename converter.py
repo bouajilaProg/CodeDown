@@ -9,12 +9,14 @@ class ConverterEngine:
     def convert_to_html(self) -> str:
         import markdown
         from markdown.extensions.codehilite import CodeHiliteExtension
+        from markdown.extensions.tables import TableExtension
 
         html = markdown.markdown(
             self.markdown_text,
             extensions=[
                 "fenced_code",
                 CodeHiliteExtension(linenums=False, css_class="highlight"),
+                TableExtension(),
             ],
         )
         return html
