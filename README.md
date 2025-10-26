@@ -1,6 +1,6 @@
-# 🧠 Codedown
+# codeDown
 
-**Codedown** is a simple yet powerful **CLI tool** that lets you export your Markdown (`.md`) files into **beautiful themed PDFs** — complete with **syntax-highlighted code blocks**.
+**codeDown** is a simple yet powerful **CLI tool** that lets you export your Markdown (`.md`) files into **beautiful themed PDFs** — complete with **syntax-highlighted code blocks**.
 
 Built for developers who love clean documentation, readable code snippets, and automated workflows.
 
@@ -8,44 +8,53 @@ Built for developers who love clean documentation, readable code snippets, and a
 
 ## 🚀 Features
 
-* 🎨 **Syntax Highlighting** for code blocks (via Pygments)
-* 🧩 **Custom Themes** – apply your own CSS styles for a personalized look
+* 🎨 **Syntax Highlighting** for code blocks 
 * ⚡ **Fast & Lightweight** – converts Markdown to PDF in seconds
 * 📁 **Command Line Friendly** – perfect for integrating into build scripts or documentation pipelines
 * 🧱 **No External Dependencies** – just Python and your Markdown files
 
 ---
 
-## 📦 Installation
+## Installation (Linux)
 
-Make sure you have **Python 3.8+** installed.
+1. **Download the latest release**
+   Visit the [Releases Page](https://github.com/bouajilaProg/CodeDown/releases) and download the latest binary for Linux (e.g. `code-down`).
 
-```bash
-git clone https://github.com/bouajilaprog/codedown.git
-cd codedown
-pip install -r requirements.txt
-```
+2. **Make it executable**
 
-Then make the CLI executable:
+   ```bash
+   chmod +x code-down
+   ```
 
-```bash
-chmod +x main.py
-```
+3. **Add it to your PATH**
+   Move it somewhere accessible globally, such as `/usr/local/bin`:
 
-Or just run it with Python.
+   ```bash
+   sudo mv code-down /usr/local/bin/
+   ```
 
 ---
 
-## 🧰 Usage
+## Usage
 
 Convert a Markdown file into a themed PDF:
 
 ```bash
-python main.py input.md output.pdf
+code-down input.md output.pdf
 ```
 
 ### Example
 
 ```bash
-python main.py README.md README.pdf
+code-down README.md README.pdf
 ```
+
+
+---
+
+## 💡 Notes
+
+* Ensure your Markdown files are UTF-8 encoded for best results.
+* codeDown supports code syntax highlighting for most major languages.
+* Works offline — no internet connection required.
+

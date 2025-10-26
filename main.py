@@ -4,7 +4,7 @@ from converter import ConverterEngine
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python converter.py <input_markdown.md> <output.pdf>")
+        print("Usage: code-down <input_markdown.md> <output.pdf>")
         sys.exit(1)
 
     input_file = Path(sys.argv[1])
