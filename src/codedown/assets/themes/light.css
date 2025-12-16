@@ -1,0 +1,28 @@
+/* Light Theme Variables (High-Contrast) */
+:root {
+  /* Core Colors */
+  --theme-bg: #f9f9f9;
+  --theme-text: #333333;
+
+  /* Accent Colors */
+  --theme-header: #007acc;
+  --theme-link: #005f99;
+
+  /* Structural Colors */
+  --theme-border: #cccccc;
+  --theme-hr-border: #bbbbbb;
+
+  /* Code Block Colors */
+  --theme-code-bg: #eeeeee;
+  --theme-code-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Blockquote Colors */
+  --theme-blockquote-bg: #f0f8ff;
+  --theme-blockquote-border: #7db0e5;
+  --theme-blockquote-text: #444444;
+  /* Darker text for readability */
+
+  /* Table Colors */
+  --theme-table-header-bg: #e0e0e0;
+  --theme-table-header-text: #444444;
+}
