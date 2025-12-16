@@ -1,0 +1,27 @@
+/* Dark Theme Variables (Tokyonight-inspired) */
+:root {
+  /* Core Colors */
+  --theme-bg: #1a1b26;
+  --theme-text: #c0caf5;
+
+  /* Accent Colors */
+  --theme-header: #7aa2f7;
+  --theme-link: #7dcfff;
+
+  /* Structural Colors */
+  --theme-border: #2f3549;
+  --theme-hr-border: #3b4261;
+
+  /* Code Block Colors */
+  --theme-code-bg: #24283b;
+  --theme-code-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Blockquote Colors */
+  --theme-blockquote-bg: #1f2335;
+  --theme-blockquote-border: #565f89;
+  --theme-blockquote-text: #a9b1d6;
+
+  /* Table Colors */
+  --theme-table-header-bg: #2f3549;
+  --theme-table-header-text: #bb9af7;
+}
