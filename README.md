@@ -1,6 +1,6 @@
 # codeDown
 
-**codeDown** is a simple yet powerful **CLI tool** that lets you export your Markdown (`.md`) files into **beautiful themed PDFs** — complete with **syntax-highlighted code blocks**.
+**codeDown** is a simple yet powerful **CLI tool** that converts Markdown (`.md`) files into **beautiful themed PDFs** — complete with **syntax-highlighted code blocks**.
 
 Built for developers who love clean documentation, readable code snippets, and automated workflows.
 
@@ -8,17 +8,16 @@ Built for developers who love clean documentation, readable code snippets, and a
 
 ## 🚀 Features
 
-* 🎨 **Syntax Highlighting** for code blocks 
-* ⚡ **Fast & Lightweight** – converts Markdown to PDF in seconds
-* 📁 **Command Line Friendly** – perfect for integrating into build scripts or documentation pipelines
-* 🧱 **No External Dependencies** – just Python and your Markdown files
+*  **Syntax Highlighting** for code blocks
+*  **Selectable Themes** – choose a style for your PDF (`light` or `dark`)
+*  **Fast & Lightweight** – converts Markdown to PDF in seconds
 
 ---
 
 ## Installation (Linux)
 
 1. **Download the latest release**
-   Visit the [Releases Page](https://github.com/bouajilaProg/CodeDown/releases) and download the latest binary for Linux (e.g. `code-down`).
+   Visit the [Releases Page](https://github.com/bouajilaProg/CodeDown/releases) and download the latest Linux binary (e.g., `code-down`).
 
 2. **Make it executable**
 
@@ -40,21 +39,36 @@ Built for developers who love clean documentation, readable code snippets, and a
 Convert a Markdown file into a themed PDF:
 
 ```bash
-code-down input.md output.pdf
+code-down input.md -o output.pdf -s dark
 ```
 
-### Example
+### Options
+
+| Flag           | Description                     | Default                             |
+| -------------- | ------------------------------- | ----------------------------------- |
+| `-o, --output` | Output PDF file path            | Same as input with `.pdf` extension |
+| `-s, --style`  | Theme style (`light` or `dark`) | `light`                             |
+
+### Examples
+
+Convert `README.md` to `README.pdf` using the default light theme:
 
 ```bash
-code-down README.md README.pdf
+code-down README.md
 ```
 
+Convert with a dark theme and custom output name:
+
+```bash
+code-down README.md -o README_dark.pdf -s dark
+```
 
 ---
 
 ## 💡 Notes
 
 * Ensure your Markdown files are UTF-8 encoded for best results.
-* codeDown supports code syntax highlighting for most major languages.
-* Works offline — no internet connection required.
+* Supports syntax highlighting for most major programming languages.
+* Works completely offline — no internet connection required.
 
+ I can also **add a small diagram or CLI usage snippet** showing how `input → output → style` works, which makes the README even more visually clear. Do you want me to do that?
