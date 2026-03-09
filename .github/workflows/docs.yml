@@ -20,23 +20,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: "20"
+          cache: "npm"
 
       - name: Install docs dependencies
-        run: |
-          python -m pip install -U pip
-          python -m pip install -e '.[dev]'
+        run: npm --prefix docs install
 
       - name: Build site
-        run: mkdocs build --clean --site-dir site
+        run: npm --prefix docs run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: docs/build
 
   deploy:
     needs: build

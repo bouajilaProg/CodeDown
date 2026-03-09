@@ -1,4 +1,8 @@
-# Themes
+---
+title: "Themes"
+---
+
+## Create your own theme
 
 Themes live in `src/codedown/assets/themes/`.
 
@@ -21,3 +25,24 @@ Add a new theme by dropping:
 - `mytheme.css`
 
 in that directory.
+
+## Example
+
+`mytheme.toml`:
+
+```toml
+name = "mytheme"
+css_file = "mytheme.css"
+code_theme = "monokai"
+version = "1.0.0"
+```
+
+`mytheme.css`:
+
+```css
+:root {
+  --page-bg: #ffffff;
+  --page-fg: #0f172a;
+  --accent: #2563eb;
+}
+```

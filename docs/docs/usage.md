@@ -1,4 +1,6 @@
-# CLI
+---
+title: "Usage"
+---
 
 ## Convert
 

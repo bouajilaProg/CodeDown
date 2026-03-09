@@ -30,11 +30,12 @@ pytest
 ## Docs
 
 ```bash
-mkdocs serve
+npm --prefix docs install
+npm --prefix docs run start
 ```
 
 ```bash
-mkdocs build
+npm --prefix docs run build
 ```
 ```
 
