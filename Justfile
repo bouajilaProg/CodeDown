@@ -16,12 +16,12 @@ build: test
   python -m build
 
 docs-dev:
-  pnpm --prefix docs install
-  pnpm --prefix docs run start
+  npm --prefix docs install
+  npm --prefix docs run start
 
 docs-build:
-  pnpm --prefix docs install
-  pnpm --prefix docs run build
+  npm --prefix docs install
+  npm --prefix docs run build
 
 uv-build:
   uv build
