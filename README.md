@@ -74,7 +74,7 @@ code-down -w input.md
 
 | Command              | Description                                   |
 | -------------------- | --------------------------------------------- |
-| `code-down themes`   | Browse and select a theme interactively        |
+| `code-down themes`   | Pick a theme interactively (sets as default)   |
 | `code-down config show` | Show current configuration                 |
 | `code-down config set-theme` | Set the default theme (interactive or by name) |
 | `code-down update`   | Update codeDown to the latest version          |

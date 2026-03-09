@@ -231,7 +231,7 @@ def themes_command():
     """Browse and select a theme interactively."""
     from InquirerPy import inquirer
 
-    from codedown.config import get_default_theme
+    from codedown.config import get_default_theme, set_default_theme
     from codedown.themes import get_all_themes
 
     themes = get_all_themes()
@@ -253,7 +253,8 @@ def themes_command():
     if selected is None:
         raise typer.Exit(0)
 
-    typer.echo(selected)
+    set_default_theme(selected)
+    typer.echo(f"Default theme set to '{selected}'")
 
 
 # --- update command ---

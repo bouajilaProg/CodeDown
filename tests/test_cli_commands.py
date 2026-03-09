@@ -75,10 +75,12 @@ def test_version_flag(runner, monkeypatch):
 
 def test_themes_command_outputs_selected(runner, fake_inquirerpy, isolate_config):
     from codedown.cli import app
+    from codedown.config import load_config
 
     result = runner.invoke(app, ["themes"])
     assert result.exit_code == 0
-    assert result.output.strip() == "dark"
+    assert "Default theme set" in result.output
+    assert load_config().get("default_theme") == "dark"
 
 
 def test_config_help(runner):
