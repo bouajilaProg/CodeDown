@@ -1,7 +1,4 @@
-from pygments.formatters import HtmlFormatter
-from codedown import themes
-from codedown.paths import THEMES_DIR
-from codedown.themes import Theme
+from codedown.themes import Theme, get_theme_by_name
 
 
 class ConverterEngine:
@@ -23,21 +20,17 @@ class ConverterEngine:
         )
         return html
 
-    def applyTheme(self, html_content: str, theme: Theme) -> str:
-
+    def apply_theme(self, html_content: str, theme: Theme) -> str:
         return f"""<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
                     <title>Markdown Preview</title><style>{theme.get_css()}
                     </style></head>
                     <body>{html_content}</body></html>"""
 
-    def convert_to_pdf(self, output_pdf_path: str, style: str = "DARK"):
-        from weasyprint import HTML, CSS
+    def convert_to_pdf(self, output_pdf_path: str, style: str = "dark"):
+        from weasyprint import HTML
 
         html_content = self.convert_to_html()
-        full_html = self.applyTheme(
-            html_content, Theme.from_str(style))
+        theme = get_theme_by_name(style)
+        full_html = self.apply_theme(html_content, theme)
 
-        # Write PDF with the same CSS
-        HTML(string=full_html).write_pdf(
-            output_pdf_path,
-        )
+        HTML(string=full_html).write_pdf(output_pdf_path)

@@ -1,0 +1,4 @@
+name = "dark"
+css_file = "dark.css"
+code_theme = "monokai"
+version = "1.0.0"

@@ -1,42 +1,40 @@
 import sys
 from pathlib import Path
+from typing import Optional
+
+import typer
+
+app = typer.Typer(
+    name="code-down",
+    help="Convert Markdown files into beautifully themed PDFs with syntax-highlighted code blocks.",
+    add_completion=False,
+)
 
 
-class CliParser:
-    def __init__(self, args):
-        self.args = args[1:]
-        self.input_file = None
-        self.output_file = None
-        self.style = None
+@app.command()
+def convert(
+    input_file: Path = typer.Argument(..., help="Input Markdown file to convert"),
+    output: Optional[Path] = typer.Option(
+        None, "-o", "--output", help="Output PDF file path"
+    ),
+    style: Optional[str] = typer.Option(
+        None, "-s", "--style", help="Theme style (e.g. light, dark)"
+    ),
+):
+    """Convert a Markdown file into a themed PDF."""
+    from codedown.config import load_config
+    from codedown.converter import ConverterEngine
 
-    def parse(self):
-        if not self.args:
-            self._print_usage()
-            sys.exit(1)
+    if not input_file.exists():
+        typer.echo(f"Error: Input file '{input_file}' does not exist", err=True)
+        raise typer.Exit(code=1)
 
-        # help flag
-        if "-h" in self.args or "--help" in self.args:
-            self._print_usage()
-            sys.exit(0)
+    output_file = output or input_file.with_suffix(".pdf")
+    config = load_config()
+    theme_name = style or config.get("default_theme", "dark")
 
-        self.input_file = Path(self.args[0])
+    markdown_text = input_file.read_text(encoding="utf-8")
+    converter = ConverterEngine(markdown_text)
+    converter.convert_to_pdf(str(output_file), style=theme_name)
 
-        # Parse optional arguments
-        for i in range(1, len(self.args)):
-            if self.args[i] in ("-o", "--output") and i + 1 < len(self.args):
-                self.output_file = Path(self.args[i + 1])
-            elif self.args[i] in ("-s", "--style") and i + 1 < len(self.args):
-                self.style = self.args[i + 1]
-
-        # Set defaults and validate
-        if not self.input_file.exists():
-            print(f"Error: Input file '{self.input_file}' does not exist")
-            sys.exit(1)
-
-        if self.output_file is None:
-            self.output_file = self.input_file.with_suffix(".pdf")
-
-        return self
-
-    def _print_usage(self):
-        print("Usage: codedown <input.md> [-o output.pdf] [-s style]")
+    typer.echo(f"PDF successfully created: {output_file}")

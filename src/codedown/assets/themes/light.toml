@@ -1,0 +1,4 @@
+name = "light"
+css_file = "light.css"
+code_theme = "default"
+version = "1.0.0"
