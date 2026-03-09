@@ -202,3 +202,14 @@ def themes_command():
         typer.echo(f"Default theme set to '{selected}'")
     else:
         typer.echo("Cancelled.")
+
+
+# --- update command ---
+
+
+@app.command("update")
+def update_command():
+    """Update codeDown to the latest version."""
+    from codedown.updater import run_update
+
+    run_update()
