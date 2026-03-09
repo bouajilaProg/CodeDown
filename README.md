@@ -1,10 +1,9 @@
 # codeDown
 
-[![PyPI version](https://img.shields.io/pypi/v/code-down?color=blue)](https://pypi.org/project/code-down/)
-[![Python](https://img.shields.io/pypi/pyversions/code-down)](https://pypi.org/project/code-down/)
-[![License: MIT](https://img.shields.io/github/license/bouajilaProg/CodeDown)](https://github.com/bouajilaProg/CodeDown/blob/main/LICENSE)
-[![Release](https://img.shields.io/github/actions/workflow/status/bouajilaProg/CodeDown/release.yml?label=release)](https://github.com/bouajilaProg/CodeDown/actions/workflows/release.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/bouajilaProg/CodeDown?label=latest)](https://github.com/bouajilaProg/CodeDown/releases/latest)
+[![PyPI version](https://img.shields.io/pypi/v/code-down.svg?color=blue)](https://pypi.org/project/code-down/)
+[![Python versions](https://img.shields.io/pypi/pyversions/code-down.svg)](https://pypi.org/project/code-down/)
+[![License: MIT](https://img.shields.io/github/license/bouajilaProg/CodeDown.svg)](https://github.com/bouajilaProg/CodeDown/blob/main/LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/bouajilaProg/CodeDown/release.yml)](https://github.com/bouajilaProg/CodeDown/actions)
 
 **codeDown** is a simple yet powerful **CLI tool** that converts Markdown (`.md`) files into **beautiful themed PDFs** — complete with **syntax-highlighted code blocks**.
 
