@@ -80,6 +80,12 @@ code-down -w input.md
 
 ### Examples
 
+Quick test file:
+
+```bash
+code-down examples/example.md
+```
+
 Convert `README.md` to `README.pdf` using the default theme:
 
 ```bash
