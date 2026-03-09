@@ -131,3 +131,48 @@ def _pick_and_set_theme():
 
     set_default_theme(selected)
     typer.echo(f"Default theme set to '{selected}'")
+
+
+# --- themes command ---
+
+
+@app.command("themes")
+def themes_command():
+    """Browse and select a theme interactively."""
+    from InquirerPy import inquirer
+
+    from codedown.config import get_default_theme, set_default_theme
+    from codedown.themes import get_all_themes
+
+    themes = get_all_themes()
+    current = get_default_theme()
+
+    choices = []
+    for theme in themes:
+        label = f"{theme.name} (syntax: {theme.code_theme}, v{theme.version})"
+        if theme.name == current:
+            label += "  ← current"
+        choices.append({"name": label, "value": theme.name})
+
+    selected = inquirer.select(
+        message="Pick a theme:",
+        choices=choices,
+        default=current,
+    ).execute()
+
+    if selected is None:
+        raise typer.Exit(0)
+
+    action = inquirer.select(
+        message=f"What to do with '{selected}'?",
+        choices=[
+            {"name": "Set as default theme", "value": "set_default"},
+            {"name": "Cancel", "value": "cancel"},
+        ],
+    ).execute()
+
+    if action == "set_default":
+        set_default_theme(selected)
+        typer.echo(f"Default theme set to '{selected}'")
+    else:
+        typer.echo("Cancelled.")
