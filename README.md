@@ -4,6 +4,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/code-down.svg)](https://pypi.org/project/code-down/)
 [![License: MIT](https://img.shields.io/github/license/bouajilaProg/CodeDown.svg)](https://github.com/bouajilaProg/CodeDown/blob/main/LICENSE)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/bouajilaProg/CodeDown/release.yml)](https://github.com/bouajilaProg/CodeDown/actions)
+[![Docs](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://bouajilaprog.github.io/CodeDown/)
 
 **codeDown** is a simple yet powerful **CLI tool** that converts Markdown (`.md`) files into **beautiful themed PDFs** — complete with **syntax-highlighted code blocks**.
 
