@@ -17,9 +17,6 @@ jobs:
       name: pypi
       url: https://pypi.org/p/code-down
 
-    permissions:
-      id-token: write  # trusted publishing
-
     steps:
       - uses: actions/checkout@v4
 
@@ -36,6 +33,9 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   # ── Build Linux binary and upload to GitHub Release ──────────────────
   build-linux:
