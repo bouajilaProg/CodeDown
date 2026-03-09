@@ -4,6 +4,7 @@
 
 ```bash
 python -m pip install -U pip
+python -m pip install -r requirements.txt
 python -m pip install -e '.[dev]'
 ```
 
@@ -25,6 +26,16 @@ code-down examples/example.md out/
 
 ```bash
 pytest
+
+## Docs
+
+```bash
+mkdocs serve
+```
+
+```bash
+mkdocs build
+```
 ```
 
 ## Clean

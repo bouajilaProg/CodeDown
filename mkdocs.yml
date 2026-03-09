@@ -1,0 +1,14 @@
+site_name: codeDown
+site_url: https://bouajilaprog.github.io/CodeDown/
+repo_url: https://github.com/bouajilaProg/CodeDown
+repo_name: bouajilaProg/CodeDown
+
+theme:
+  name: mkdocs
+
+nav:
+  - Home: index.md
+  - CLI: cli.md
+  - Themes: themes.md
+  - Development: development.md
+  - Release: release.md

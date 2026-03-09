@@ -43,6 +43,7 @@ code-down = "codedown.__main__:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "mkdocs>=1.6",
 ]
 
 [tool.setuptools]

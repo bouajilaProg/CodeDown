@@ -5,19 +5,18 @@ default:
 
 install:
   python -m pip install -U pip
+  python -m pip install -r requirements.txt
   python -m pip install -e '.[dev]'
 
 test:
   pytest
 
-build:
+build: test
+  python -m pip install -U build
   python -m build
 
 uv-build:
   uv build
-
-publish:
-  uv publish --token "$PYPI_API_TOKEN"
 
 release TAG:
   gh release create {{TAG}} --title "{{TAG}}" --generate-notes
