@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Publish Python package to PyPI ───────────────────────────────────
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/code-down
+
+    permissions:
+      id-token: write  # trusted publishing
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  # ── Build Linux binary and upload to GitHub Release ──────────────────
+  build-linux:
+    name: Build Linux Binary
+    runs-on: ubuntu-latest
+    needs: publish-pypi
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libpango1.0-dev \
+            libharfbuzz-dev \
+            libffi-dev \
+            libjpeg-dev \
+            libopenjp2-7-dev
+
+      - name: Install Python dependencies
+        run: |
+          pip install pyinstaller
+          pip install .
+
+      - name: Build standalone binary
+        run: |
+          pyinstaller \
+            --onefile \
+            --clean \
+            --strip \
+            --name code-down \
+            --add-data "./src/codedown/assets:assets" \
+            src/codedown/__main__.py
+
+      - name: Upload binary to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            dist/code-down \
+            --clobber
