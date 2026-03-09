@@ -50,7 +50,7 @@ pip install code-down
 Convert a Markdown file into a themed PDF:
 
 ```bash
-code-down input.md -o output.pdf -s dark
+code-down input.md output.pdf -s dark
 ```
 
 ### Watch mode
@@ -68,6 +68,7 @@ code-down -w input.md
 | `-o, --output`    | Output PDF file path                    | Same as input with `.pdf` extension |
 | `-s, --style`     | Theme style (e.g. `light`, `dark`)      | Config default or `dark`            |
 | `-w, --watch`     | Watch file and rebuild PDF on changes   |                                     |
+| `-v, --version`   | Print version and exit                  |                                     |
 
 ### Commands
 

@@ -15,7 +15,7 @@ def _rewrite_argv_for_implicit_convert(argv: list[str]) -> list[str]:
     first = argv[1]
 
     # Let click/typer handle help/version and explicit subcommands.
-    if first in {"-h", "--help", "--version"}:
+    if first in {"-h", "--help", "-v", "--version"}:
         return argv
     if first in _SUBCOMMANDS:
         return argv

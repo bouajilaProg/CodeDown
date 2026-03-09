@@ -3,20 +3,92 @@ from typing import Optional
 
 import typer
 
+
+def _get_package_version() -> str:
+    try:
+        from importlib.metadata import PackageNotFoundError, version
+
+        return version("code-down")
+    except Exception:
+        return "unknown"
+
+
+def _version_callback(value: bool):
+    if not value:
+        return
+    typer.echo(_get_package_version())
+    raise typer.Exit(0)
+
+
 app = typer.Typer(
     name="code-down",
     help="Convert Markdown files into beautifully themed PDFs with syntax-highlighted code blocks.",
     add_completion=False,
     no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
-config_app = typer.Typer(help="Manage codeDown configuration.", no_args_is_help=True)
+config_app = typer.Typer(
+    help="Manage codeDown configuration.",
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 app.add_typer(config_app, name="config")
+
+
+@app.callback()
+def _global_options(
+    version: bool = typer.Option(
+        False,
+        "-v",
+        "--version",
+        help="Show version and exit",
+        callback=_version_callback,
+        is_eager=True,
+    ),
+):
+    return
+
+
+def _resolve_output_file(
+    input_file: Path,
+    output_arg: Optional[Path],
+    output_opt: Optional[Path],
+) -> Path:
+    if output_arg is not None and output_opt is not None:
+        typer.echo(
+            "Error: provide output either as 2nd argument or via -o/--output", err=True
+        )
+        raise typer.Exit(code=2)
+
+    output_raw = output_opt or output_arg
+    if output_raw is None:
+        return input_file.with_suffix(".pdf")
+
+    # Treat as directory if it is a dir, or has no suffix (e.g. `temp`).
+    if output_raw.exists() and output_raw.is_dir():
+        output_dir = output_raw
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir / f"{input_file.stem}.pdf"
+
+    if output_raw.suffix == "":
+        output_dir = output_raw
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir / f"{input_file.stem}.pdf"
+
+    if output_raw.suffix.lower() != ".pdf":
+        output_raw = output_raw.with_suffix(".pdf")
+
+    output_raw.parent.mkdir(parents=True, exist_ok=True)
+    return output_raw
 
 
 @app.command("convert")
 def convert_command(
     input_file: Path = typer.Argument(..., help="Input Markdown file to convert"),
+    output_location: Optional[Path] = typer.Argument(
+        None, help="Output directory or PDF path (optional)"
+    ),
     output: Optional[Path] = typer.Option(
         None, "-o", "--output", help="Output PDF file path"
     ),
@@ -29,14 +101,15 @@ def convert_command(
 ):
     """Convert a Markdown file into a themed PDF."""
     if watch:
-        _do_watch(input_file, output, style)
+        _do_watch(input_file, output_location, output, style)
     else:
-        _do_convert(input_file, output, style)
+        _do_convert(input_file, output_location, output, style)
 
 
 def _do_convert(
     input_file: Path,
-    output: Optional[Path] = None,
+    output_location: Optional[Path] = None,
+    output_opt: Optional[Path] = None,
     style: Optional[str] = None,
 ):
     """Core conversion logic shared by convert and watch."""
@@ -47,7 +120,7 @@ def _do_convert(
         typer.echo(f"Error: Input file '{input_file}' does not exist", err=True)
         raise typer.Exit(code=1)
 
-    output_file = output or input_file.with_suffix(".pdf")
+    output_file = _resolve_output_file(input_file, output_location, output_opt)
     config = load_config()
     theme_name = style or config.get("default_theme", "dark")
 
@@ -60,7 +133,8 @@ def _do_convert(
 
 def _do_watch(
     input_file: Path,
-    output: Optional[Path] = None,
+    output_location: Optional[Path] = None,
+    output_opt: Optional[Path] = None,
     style: Optional[str] = None,
 ):
     """Watch the input file and rebuild PDF on changes."""
@@ -71,7 +145,7 @@ def _do_watch(
         typer.echo(f"Error: Input file '{input_file}' does not exist", err=True)
         raise typer.Exit(code=1)
 
-    output_file = output or input_file.with_suffix(".pdf")
+    output_file = _resolve_output_file(input_file, output_location, output_opt)
     config = load_config()
     theme_name = style or config.get("default_theme", "dark")
 
@@ -106,7 +180,7 @@ def config_set_theme(
 ):
     """Set the default theme. Run without arguments for interactive picker."""
     from codedown.config import set_default_theme
-    from codedown.themes import get_all_themes, get_theme_by_name
+    from codedown.themes import get_theme_by_name
 
     if theme_name is None:
         _pick_and_set_theme()
@@ -157,7 +231,7 @@ def themes_command():
     """Browse and select a theme interactively."""
     from InquirerPy import inquirer
 
-    from codedown.config import get_default_theme, set_default_theme
+    from codedown.config import get_default_theme
     from codedown.themes import get_all_themes
 
     themes = get_all_themes()
@@ -179,19 +253,7 @@ def themes_command():
     if selected is None:
         raise typer.Exit(0)
 
-    action = inquirer.select(
-        message=f"What to do with '{selected}'?",
-        choices=[
-            {"name": "Set as default theme", "value": "set_default"},
-            {"name": "Cancel", "value": "cancel"},
-        ],
-    ).execute()
-
-    if action == "set_default":
-        set_default_theme(selected)
-        typer.echo(f"Default theme set to '{selected}'")
-    else:
-        typer.echo("Cancelled.")
+    typer.echo(selected)
 
 
 # --- update command ---
