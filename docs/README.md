@@ -1,0 +1,5 @@
+# Docs
+
+- `docs/cli.md`: CLI usage and flags
+- `docs/themes.md`: Theme system (TOML + CSS)
+- `docs/development.md`: Dev setup, tests, and build notes

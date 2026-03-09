@@ -1,9 +1,27 @@
-# Python bytecode files
-__pycache__/*
-*.pyc
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
 
-# build files 
+# Builds
 build/
 dist/
-main.spec
 
+# PyInstaller
+*.spec
+!code-down.spec
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Outputs
+*.pdf
+
+# OS / Editors
+.DS_Store
+
+# Env
+.env
+.venv/
