@@ -7,6 +7,13 @@ python -m pip install -U pip
 python -m pip install -e '.[dev]'
 ```
 
+## Just + uv (recommended)
+
+```bash
+just install
+just test
+```
+
 ## Run
 
 ```bash
