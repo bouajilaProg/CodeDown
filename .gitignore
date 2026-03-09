@@ -19,6 +19,9 @@ htmlcov/
 # Outputs
 *.pdf
 
+# Local notes
+post.md
+
 # OS / Editors
 .DS_Store
 
