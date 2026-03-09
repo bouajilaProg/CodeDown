@@ -7,19 +7,16 @@ app = typer.Typer(
     name="code-down",
     help="Convert Markdown files into beautifully themed PDFs with syntax-highlighted code blocks.",
     add_completion=False,
-    invoke_without_command=True,
+    no_args_is_help=True,
 )
 
-config_app = typer.Typer(help="Manage codeDown configuration.")
+config_app = typer.Typer(help="Manage codeDown configuration.", no_args_is_help=True)
 app.add_typer(config_app, name="config")
 
 
-@app.callback()
-def main_callback(
-    ctx: typer.Context,
-    input_file: Optional[Path] = typer.Argument(
-        None, help="Input Markdown file to convert"
-    ),
+@app.command("convert")
+def convert_command(
+    input_file: Path = typer.Argument(..., help="Input Markdown file to convert"),
     output: Optional[Path] = typer.Option(
         None, "-o", "--output", help="Output PDF file path"
     ),
@@ -30,14 +27,7 @@ def main_callback(
         False, "-w", "--watch", help="Watch the file and rebuild PDF on changes"
     ),
 ):
-    """Convert Markdown files into beautifully themed PDFs with syntax-highlighted code blocks."""
-    if ctx.invoked_subcommand is not None:
-        return
-
-    if input_file is None:
-        typer.echo(ctx.get_help())
-        raise typer.Exit(0)
-
+    """Convert a Markdown file into a themed PDF."""
     if watch:
         _do_watch(input_file, output, style)
     else:
