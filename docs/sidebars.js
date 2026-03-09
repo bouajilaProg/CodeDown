@@ -1,8 +1,24 @@
 const sidebars = {
   docsSidebar: [
     "intro",
-    "usage",
-    "themes",
+    {
+      type: "category",
+      label: "Usage",
+      items: [
+        "usage/convert",
+        "usage/watch",
+        "usage/config",
+        "usage/update",
+      ],
+    },
+    {
+      type: "category",
+      label: "Themes",
+      items: [
+        "themes/overview",
+        "themes/create",
+      ],
+    },
   ],
 };
 

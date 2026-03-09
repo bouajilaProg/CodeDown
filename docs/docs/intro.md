@@ -12,6 +12,18 @@ pip install code-down
 code-down README.md
 ```
 
+Try a different theme:
+
+```bash
+code-down README.md -s light
+```
+
+Watch a file and rebuild on save:
+
+```bash
+code-down -w README.md
+```
+
 ## What you can do
 
 - Convert Markdown to PDF
