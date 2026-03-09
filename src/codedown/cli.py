@@ -83,6 +83,16 @@ def _resolve_output_file(
     return output_raw
 
 
+def _theme_choice_values(current: str) -> list[str]:
+    from codedown.themes import get_all_themes
+
+    names = sorted({t.name for t in get_all_themes()}, key=str.lower)
+    if current in names:
+        names.remove(current)
+        return [current, *names]
+    return names
+
+
 @app.command("convert")
 def convert_command(
     input_file: Path = typer.Argument(..., help="Input Markdown file to convert"),
@@ -197,17 +207,11 @@ def _pick_and_set_theme():
     from InquirerPy import inquirer
 
     from codedown.config import get_default_theme, set_default_theme
-    from codedown.themes import get_all_themes
 
-    themes = get_all_themes()
     current = get_default_theme()
+    theme_names = _theme_choice_values(current)
 
-    choices = []
-    for theme in themes:
-        label = f"{theme.name} (syntax: {theme.code_theme})"
-        if theme.name == current:
-            label += "  ← current"
-        choices.append({"name": label, "value": theme.name})
+    choices = [{"name": name, "value": name} for name in theme_names]
 
     selected = inquirer.select(
         message="Select default theme:",
@@ -232,17 +236,11 @@ def themes_command():
     from InquirerPy import inquirer
 
     from codedown.config import get_default_theme, set_default_theme
-    from codedown.themes import get_all_themes
 
-    themes = get_all_themes()
     current = get_default_theme()
+    theme_names = _theme_choice_values(current)
 
-    choices = []
-    for theme in themes:
-        label = f"{theme.name} (syntax: {theme.code_theme}, v{theme.version})"
-        if theme.name == current:
-            label += "  ← current"
-        choices.append({"name": label, "value": theme.name})
+    choices = [{"name": name, "value": name} for name in theme_names]
 
     selected = inquirer.select(
         message="Pick a theme:",
