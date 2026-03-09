@@ -26,6 +26,9 @@ def main_callback(
     style: Optional[str] = typer.Option(
         None, "-s", "--style", help="Theme style (e.g. light, dark)"
     ),
+    watch: bool = typer.Option(
+        False, "-w", "--watch", help="Watch the file and rebuild PDF on changes"
+    ),
 ):
     """Convert Markdown files into beautifully themed PDFs with syntax-highlighted code blocks."""
     if ctx.invoked_subcommand is not None:
@@ -35,7 +38,10 @@ def main_callback(
         typer.echo(ctx.get_help())
         raise typer.Exit(0)
 
-    _do_convert(input_file, output, style)
+    if watch:
+        _do_watch(input_file, output, style)
+    else:
+        _do_convert(input_file, output, style)
 
 
 def _do_convert(
@@ -60,6 +66,26 @@ def _do_convert(
     converter.convert_to_pdf(str(output_file), style=theme_name)
 
     typer.echo(f"PDF successfully created: {output_file}")
+
+
+def _do_watch(
+    input_file: Path,
+    output: Optional[Path] = None,
+    style: Optional[str] = None,
+):
+    """Watch the input file and rebuild PDF on changes."""
+    from codedown.config import load_config
+    from codedown.watcher import watch_and_convert
+
+    if not input_file.exists():
+        typer.echo(f"Error: Input file '{input_file}' does not exist", err=True)
+        raise typer.Exit(code=1)
+
+    output_file = output or input_file.with_suffix(".pdf")
+    config = load_config()
+    theme_name = style or config.get("default_theme", "dark")
+
+    watch_and_convert(input_file, output_file, theme_name)
 
 
 # --- config subcommands ---
