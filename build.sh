@@ -1,8 +1,11 @@
 #!/bin/bash
 set -e # stop on error
 
-conda-init || true
-conda activate codeDown || true
+# If conda is available, initialize it (matches local alias `conda-init`).
+if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+  # shellcheck disable=SC1091
+  source "$HOME/miniconda3/etc/profile.d/conda.sh"
+fi
 
 echo "=== Running Python Build ==="
 ./utils/python-build.sh

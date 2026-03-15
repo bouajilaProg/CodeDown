@@ -1,4 +1,11 @@
-pyinstaller \
+set -e
+
+# Ensure PyInstaller is available in the current Python environment.
+if ! python -m pip show pyinstaller >/dev/null 2>&1; then
+  python -m pip install -q pyinstaller
+fi
+
+python -m PyInstaller \
   --onefile \
   --clean \
   --strip \
