@@ -14,6 +14,8 @@ Built for developers who love clean documentation, readable code snippets, and a
 
 ## Features
 
+*  **Direct filenames** – `code-down notes.md` or `code-down notes`
+*  **Shell Autocomplete** – run `code-down --install-completion` from Bash, Zsh, or Fish
 *  **Syntax Highlighting** for code blocks
 *  **Selectable Themes** – interactive picker or CLI flag (`light`, `dark`)
 *  **Watch Mode** – auto-regenerate PDF on file save

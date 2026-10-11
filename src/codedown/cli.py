@@ -3,6 +3,8 @@ from typing import Optional
 
 import typer
 
+from codedown.completion import ShortcutGroup, complete_markdown, complete_paths, complete_themes
+
 
 def _get_package_version() -> str:
     try:
@@ -23,7 +25,8 @@ def _version_callback(value: bool):
 app = typer.Typer(
     name="code-down",
     help="Convert Markdown files into beautifully themed PDFs with syntax-highlighted code blocks.",
-    add_completion=False,
+    add_completion=True,
+    cls=ShortcutGroup,
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
@@ -110,15 +113,15 @@ def _theme_choice_values(current: str) -> list[str]:
 
 @app.command("convert")
 def convert_command(
-    input_file: Path = typer.Argument(..., help="Input Markdown file to convert"),
+    input_file: Path = typer.Argument(..., help="Input Markdown file to convert", autocompletion=complete_markdown),
     output_location: Optional[Path] = typer.Argument(
-        None, help="Output directory or PDF path (optional)"
+        None, help="Output directory or PDF path (optional)", autocompletion=complete_paths
     ),
     output: Optional[Path] = typer.Option(
-        None, "-o", "--output", help="Output PDF file path"
+        None, "-o", "--output", help="Output PDF file path", autocompletion=complete_paths
     ),
     style: Optional[str] = typer.Option(
-        None, "-s", "--style", help="Theme style (e.g. light, dark)"
+        None, "-s", "--style", help="Theme style (e.g. light, dark)", autocompletion=complete_themes
     ),
     watch: bool = typer.Option(
         False, "-w", "--watch", help="Watch the file and rebuild PDF on changes"
@@ -196,7 +199,7 @@ def config_show():
 @config_app.command("set-theme")
 def config_set_theme(
     theme_name: Optional[str] = typer.Argument(
-        None, help="Theme name to set as default"
+        None, help="Theme name to set as default", autocompletion=complete_themes
     ),
 ):
     """Set the default theme. Run without arguments for interactive picker."""

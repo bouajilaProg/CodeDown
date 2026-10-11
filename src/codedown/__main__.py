@@ -32,7 +32,7 @@ def _rewrite_argv_for_implicit_convert(argv: list[str]) -> list[str]:
 
 def main():
     sys.argv = _rewrite_argv_for_implicit_convert(sys.argv)
-    app()
+    app(prog_name="code-down")
 
 
 if __name__ == "__main__":
