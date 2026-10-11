@@ -48,3 +48,16 @@ def test_metadata_is_escaped():
     html = ConverterEngine("# Hello", options=RenderOptions(title="<script>", author='" onclick="x')).apply_theme("<p>Hello</p>", get_theme_by_name("print"))
     assert "&lt;script&gt;" in html
     assert 'content="&quot; onclick=&quot;x"' in html
+
+
+def test_long_table_spans_pages_and_repeats_headers(tmp_path):
+    markdown = "| Entry | Detail |\n|---|---|\n" + "\n".join(
+        f"| row {index:03d} | Description for this row |" for index in range(100)
+    )
+    output = tmp_path / "table.pdf"
+    ConverterEngine(markdown).convert_to_pdf(str(output), "print")
+    pdf = PdfReader(output)
+    assert len(pdf.pages) > 1
+    for page in pdf.pages:
+        assert "Entry" in page.extract_text() and "Detail" in page.extract_text()
+    assert "row 099" in pdf.pages[-1].extract_text()

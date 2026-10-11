@@ -13,3 +13,6 @@ Pick a theme interactively and store it as your default:
 ```bash
 code-down themes
 ```
+
+The `print` theme uses a white background and restrained styling for paper output.
+Select it with `code-down notes.md --style print`.

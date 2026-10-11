@@ -1,4 +1,7 @@
+import hashlib
 import os
+from pathlib import Path
+import re
 import platform
 import shutil
 import stat
@@ -56,73 +59,84 @@ def update_via_pip():
         typer.echo(f"Updated: {current} → {new_version}")
 
 
-def update_via_binary():
-    """Update the standalone binary from GitHub Releases."""
-    current = get_current_version()
-    typer.echo(f"Current version: {current}")
-    typer.echo("Checking GitHub Releases for updates...")
+def _binary_asset_name() -> str:
+    system = platform.system().lower()
+    machine = platform.machine().lower()
+    architecture = {"amd64": "x86_64", "x64": "x86_64", "arm64": "aarch64"}.get(machine, machine)
+    suffix = ".exe" if system == "windows" else ""
+    return f"code-down-{system}-{architecture}{suffix}"
 
+
+def _asset_checksum(asset: dict, release: dict) -> str:
+    digest = asset.get("digest")
+    if digest:
+        if not re.fullmatch(r"sha256:[0-9a-fA-F]{64}", digest):
+            raise ValueError("Release asset has an invalid SHA-256 digest")
+        return digest.split(":", 1)[1].lower()
+    checksum_asset = next((item for item in release.get("assets", [])
+                           if item["name"] == asset["name"] + ".sha256"), None)
+    if checksum_asset is None:
+        raise ValueError("Release has no SHA-256 checksum; the current binary was kept")
+    with requests.get(checksum_asset["browser_download_url"], timeout=15) as response:
+        response.raise_for_status()
+        checksum = response.text.split()[0] if response.text.split() else ""
+    if not re.fullmatch(r"[0-9a-fA-F]{64}", checksum):
+        raise ValueError("Release checksum file is invalid")
+    return checksum.lower()
+
+
+def _install_binary(asset: dict, release: dict, destination: Path):
+    """Verify before replacement; stage on the destination filesystem."""
+    checksum = _asset_checksum(asset, release)
+    destination = destination.resolve()
+    backup = destination.with_name(destination.name + ".backup")
+    fd, temporary = tempfile.mkstemp(prefix=".code-down-update-", dir=destination.parent)
+    backup_temp = None
+    try:
+        hasher = hashlib.sha256()
+        with os.fdopen(fd, "wb") as file:
+            with requests.get(asset["browser_download_url"], stream=True, timeout=60) as response:
+                response.raise_for_status()
+                for chunk in response.iter_content(chunk_size=8192):
+                    file.write(chunk)
+                    hasher.update(chunk)
+            file.flush()
+            os.fsync(file.fileno())
+        if hasher.hexdigest() != checksum:
+            raise ValueError("Downloaded binary failed SHA-256 verification; current binary was kept")
+        os.chmod(temporary, destination.stat().st_mode | stat.S_IEXEC)
+        backup_fd, backup_temp = tempfile.mkstemp(prefix=".code-down-backup-", dir=destination.parent)
+        os.close(backup_fd)
+        shutil.copy2(destination, backup_temp)
+        os.replace(backup_temp, backup)
+        os.replace(temporary, destination)
+        return backup
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+        if backup_temp:
+            Path(backup_temp).unlink(missing_ok=True)
+
+
+def update_via_binary():
+    """Update only a matching, verified standalone binary."""
+    typer.echo(f"Current version: {get_current_version()}")
+    typer.echo("Checking GitHub Releases for updates...")
     try:
         release = get_latest_github_release()
-    except Exception as e:
-        typer.echo(f"Error fetching release info: {e}", err=True)
-        raise typer.Exit(code=1)
-
-    tag = release.get("tag_name", "unknown")
-    typer.echo(f"Latest release: {tag}")
-
-    # Find the Linux binary asset
-    system = platform.system().lower()
-    asset = None
-    for a in release.get("assets", []):
-        name = a["name"].lower()
-        if system in name or "code-down" in name:
-            asset = a
-            break
-
-    if asset is None:
-        typer.echo(
-            f"No binary found for {system} in release {tag}. "
-            "Try updating via pip: pip install --upgrade code-down",
-            err=True,
-        )
-        raise typer.Exit(code=1)
-
-    typer.echo(f"Downloading {asset['name']}...")
-
-    response = requests.get(asset["browser_download_url"], stream=True, timeout=60)
-    response.raise_for_status()
-
-    current_exe = os.path.realpath(sys.executable)
-    if is_pyinstaller_bundle():
-        current_exe = os.path.realpath(sys.argv[0])
-
-    # Write to a temp file, then replace the current binary
-    fd, tmp_path = tempfile.mkstemp(prefix="code-down-update-")
-    try:
-        with os.fdopen(fd, "wb") as tmp:
-            for chunk in response.iter_content(chunk_size=8192):
-                tmp.write(chunk)
-
-        # Make executable
-        os.chmod(tmp_path, os.stat(tmp_path).st_mode | stat.S_IEXEC)
-
-        # Replace the current binary
-        shutil.move(tmp_path, current_exe)
-        typer.echo(f"Updated binary at {current_exe}")
-    except PermissionError:
-        typer.echo(
-            f"Permission denied. Try: sudo code-down update",
-            err=True,
-        )
-        # Clean up temp file
-        if os.path.exists(tmp_path):
-            os.unlink(tmp_path)
-        raise typer.Exit(code=1)
-    except Exception:
-        if os.path.exists(tmp_path):
-            os.unlink(tmp_path)
-        raise
+        tag = release.get("tag_name", "unknown")
+        typer.echo(f"Latest release: {tag}")
+        expected = _binary_asset_name()
+        asset = next((item for item in release.get("assets", []) if item["name"] == expected), None)
+        if asset is None:
+            raise ValueError(f"No binary found for {expected}. Install a matching release or use pip.")
+        typer.echo(f"Downloading {asset['name']}...")
+        # PyInstaller sets sys.executable to the launched standalone executable.
+        destination = Path(sys.executable)
+        backup = _install_binary(asset, release, destination)
+        typer.echo(f"Updated binary at {destination}; previous binary: {backup}")
+    except (requests.RequestException, OSError, ValueError) as error:
+        typer.echo(f"Error updating binary: {error}", err=True)
+        raise typer.Exit(code=1) from error
 
 
 def run_update():

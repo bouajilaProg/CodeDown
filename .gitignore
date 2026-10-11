@@ -28,3 +28,7 @@ post.md
 # Env
 .env
 .venv/
+
+# Documentation dependencies and cache
+docs/node_modules/
+docs/.docusaurus/

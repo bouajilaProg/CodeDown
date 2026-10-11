@@ -25,7 +25,7 @@ def _rewrite_argv_for_implicit_convert(argv: list[str]) -> list[str]:
         return argv
 
     # Support: code-down -w file.md  (and -s/-o before the file)
-    if first in _CONVERT_LEADING_OPTIONS:
+    if first.split("=", 1)[0] in _CONVERT_LEADING_OPTIONS or first == "--":
         return [argv[0], "convert", *argv[1:]]
 
     # Support: code-down file.md

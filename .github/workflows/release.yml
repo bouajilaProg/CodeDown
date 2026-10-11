@@ -8,9 +8,13 @@ permissions:
   contents: write
 
 jobs:
+  verify:
+    uses: ./.github/workflows/tests.yml
+
   # ── Publish Python package to PyPI ───────────────────────────────────
   publish-pypi:
     name: Publish to PyPI
+    needs: verify
     runs-on: ubuntu-latest
 
     environment:
@@ -72,14 +76,19 @@ jobs:
             --onefile \
             --clean \
             --strip \
-            --name code-down \
+            --name code-down-linux-x86_64 \
+            --copy-metadata code-down \
             --add-data "./src/codedown/assets:assets" \
             src/codedown/__main__.py
+
+      - name: Generate binary checksum
+        run: cd dist && sha256sum code-down-linux-x86_64 > code-down-linux-x86_64.sha256
 
       - name: Upload binary to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload "${{ github.event.release.tag_name }}" \
-            dist/code-down \
+            dist/code-down-linux-x86_64 \
+            dist/code-down-linux-x86_64.sha256 \
             --clobber
