@@ -34,6 +34,7 @@ def watch_and_convert(
     input_file: Path,
     output_file: Path,
     style: str,
+    render_options=None,
 ):
     """Watch a Markdown file and regenerate the PDF on every change."""
     from codedown.converter import ConverterEngine
@@ -44,7 +45,7 @@ def watch_and_convert(
     def rebuild():
         try:
             markdown_text = input_file.read_text(encoding="utf-8")
-            converter = ConverterEngine(markdown_text)
+            converter = ConverterEngine(markdown_text, input_file, render_options)
             converter.convert_to_pdf(str(output_file), style=style)
             typer.echo(f"[watch] Rebuilt: {output_file}")
         except Exception as e:

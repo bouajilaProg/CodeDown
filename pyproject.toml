@@ -43,6 +43,7 @@ code-down = "codedown.__main__:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "pypdf>=5.0",
 ]
 
 [tool.setuptools]

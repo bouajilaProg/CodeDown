@@ -18,6 +18,7 @@ Built for developers who love clean documentation, readable code snippets, and a
 *  **Shell Autocomplete** – run `code-down --install-completion` from Bash, Zsh, or Fish
 *  **Syntax Highlighting** for code blocks
 *  **Selectable Themes** – interactive picker or CLI flag (`light`, `dark`)
+*  **PDF Layout** – print theme, page sizes, fonts, contents, headers, and metadata
 *  **Watch Mode** – auto-regenerate PDF on file save
 *  **Self-Update** – update from the CLI (`code-down update`)
 *  **Configurable** – set a default theme via `code-down config set-theme`

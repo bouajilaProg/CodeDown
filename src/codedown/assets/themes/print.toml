@@ -1,0 +1,4 @@
+name = "print"
+css_file = "print.css"
+code_theme = "default"
+version = "1.0.0"

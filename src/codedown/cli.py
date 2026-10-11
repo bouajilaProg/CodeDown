@@ -3,6 +3,7 @@ from typing import Optional
 
 import typer
 
+from codedown.converter import RenderOptions
 from codedown.completion import ShortcutGroup, complete_markdown, complete_paths, complete_themes
 
 
@@ -114,24 +115,32 @@ def _theme_choice_values(current: str) -> list[str]:
 @app.command("convert")
 def convert_command(
     input_file: Path = typer.Argument(..., help="Input Markdown file to convert", autocompletion=complete_markdown),
-    output_location: Optional[Path] = typer.Argument(
-        None, help="Output directory or PDF path (optional)", autocompletion=complete_paths
-    ),
-    output: Optional[Path] = typer.Option(
-        None, "-o", "--output", help="Output PDF file path", autocompletion=complete_paths
-    ),
-    style: Optional[str] = typer.Option(
-        None, "-s", "--style", help="Theme style (e.g. light, dark)", autocompletion=complete_themes
-    ),
-    watch: bool = typer.Option(
-        False, "-w", "--watch", help="Watch the file and rebuild PDF on changes"
-    ),
+    output_location: Optional[Path] = typer.Argument(None, help="Output directory or PDF path", autocompletion=complete_paths),
+    output: Optional[Path] = typer.Option(None, "-o", "--output", autocompletion=complete_paths),
+    style: Optional[str] = typer.Option(None, "-s", "--style", autocompletion=complete_themes),
+    watch: bool = typer.Option(False, "-w", "--watch", help="Rebuild on changes"),
+    page_size: str = typer.Option("A4", help="A4, A5, Letter, or Legal"),
+    margin: str = typer.Option("20mm", help="Page margin, e.g. 20mm"),
+    font: str = typer.Option("sans-serif", help="Document font family"),
+    code_font: str = typer.Option("monospace", help="Code font family"),
+    wrap_code: bool = typer.Option(True, "--wrap-code/--no-wrap-code"),
+    page_numbers: bool = typer.Option(False, "--page-numbers/--no-page-numbers"),
+    header: str = typer.Option("", help="Page header text"),
+    footer: str = typer.Option("", help="Page footer text"),
+    toc: bool = typer.Option(False, "--toc/--no-toc", help="Include a table of contents"),
+    title: str = typer.Option("", help="PDF title; defaults to input filename"),
+    author: str = typer.Option("", help="PDF author metadata"),
 ):
     """Convert a Markdown file into a themed PDF."""
+    try:
+        options = RenderOptions(page_size, margin, font, code_font, wrap_code,
+                                page_numbers, header, footer, toc, title, author)
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
     if watch:
-        _do_watch(input_file, output_location, output, style)
+        _do_watch(input_file, output_location, output, style, options)
     else:
-        _do_convert(input_file, output_location, output, style)
+        _do_convert(input_file, output_location, output, style, options)
 
 
 def _do_convert(
@@ -139,6 +148,7 @@ def _do_convert(
     output_location: Optional[Path] = None,
     output_opt: Optional[Path] = None,
     style: Optional[str] = None,
+    render_options: Optional[RenderOptions] = None,
 ):
     """Core conversion logic shared by convert and watch."""
     from codedown.config import load_config
@@ -151,7 +161,7 @@ def _do_convert(
     theme_name = style or config.get("default_theme", "dark")
 
     markdown_text = input_file.read_text(encoding="utf-8")
-    converter = ConverterEngine(markdown_text)
+    converter = ConverterEngine(markdown_text, input_file, render_options)
     converter.convert_to_pdf(str(output_file), style=theme_name)
 
     typer.echo(f"PDF successfully created: {output_file}")
@@ -162,6 +172,7 @@ def _do_watch(
     output_location: Optional[Path] = None,
     output_opt: Optional[Path] = None,
     style: Optional[str] = None,
+    render_options: Optional[RenderOptions] = None,
 ):
     """Watch the input file and rebuild PDF on changes."""
     from codedown.config import load_config
@@ -173,7 +184,7 @@ def _do_watch(
     config = load_config()
     theme_name = style or config.get("default_theme", "dark")
 
-    watch_and_convert(input_file, output_file, theme_name)
+    watch_and_convert(input_file, output_file, theme_name, render_options)
 
 
 # --- config subcommands ---

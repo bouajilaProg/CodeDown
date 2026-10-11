@@ -1,0 +1,16 @@
+:root {
+  --theme-bg: white;
+  --theme-text: #111;
+  --theme-header: #111;
+  --theme-border: #ccc;
+  --theme-link: #222;
+  --theme-code-bg: #f5f5f5;
+  --theme-code-shadow: transparent;
+  --theme-blockquote-border: #777;
+  --theme-blockquote-text: #333;
+  --theme-blockquote-bg: white;
+  --theme-hr-border: #ccc;
+  --theme-table-header-bg: #f5f5f5;
+  --theme-table-header-text: #111;
+}
+pre { box-shadow: none; }

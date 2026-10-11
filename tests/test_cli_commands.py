@@ -121,7 +121,7 @@ def test_watch_invokes_watcher(runner, tmp_path, isolate_config, monkeypatch):
 
     called = {}
 
-    def _fake_watch_and_convert(input_file, output_file, style):
+    def _fake_watch_and_convert(input_file, output_file, style, render_options=None):
         called["input"] = Path(input_file)
         called["output"] = Path(output_file)
         called["style"] = style

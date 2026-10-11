@@ -6,6 +6,7 @@ const sidebars = {
       label: "Usage",
       items: [
         "usage/convert",
+        "usage/completion",
         "usage/watch",
         "usage/config",
         "usage/update",

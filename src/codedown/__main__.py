@@ -4,7 +4,12 @@ from codedown.cli import app
 
 
 _SUBCOMMANDS = {"convert", "config", "themes", "update"}
-_CONVERT_LEADING_OPTIONS = {"-w", "--watch", "-s", "--style", "-o", "--output"}
+_CONVERT_LEADING_OPTIONS = {
+    "-w", "--watch", "-s", "--style", "-o", "--output", "--page-size",
+    "--margin", "--font", "--code-font", "--wrap-code", "--no-wrap-code",
+    "--page-numbers", "--no-page-numbers", "--header", "--footer", "--toc",
+    "--no-toc", "--title", "--author",
+}
 
 
 def _rewrite_argv_for_implicit_convert(argv: list[str]) -> list[str]:
