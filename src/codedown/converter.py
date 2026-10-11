@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from html import escape
 import json
+import os
+import tempfile
 from pathlib import Path
 import re
 from typing import Optional
@@ -90,4 +92,13 @@ class ConverterEngine:
 
         full_html = self.apply_theme(self.convert_to_html(), get_theme_by_name(style))
         base_url = str(self.source_path.parent) if self.source_path else None
-        HTML(string=full_html, base_url=base_url).write_pdf(output_pdf_path)
+        destination = Path(output_pdf_path)
+        fd, temporary = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".tmp", dir=destination.parent)
+        os.close(fd)
+        try:
+            HTML(string=full_html, base_url=base_url).write_pdf(temporary)
+            if destination.exists():
+                os.chmod(temporary, destination.stat().st_mode & 0o777)
+            os.replace(temporary, destination)
+        finally:
+            Path(temporary).unlink(missing_ok=True)
