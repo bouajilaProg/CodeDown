@@ -8,7 +8,7 @@ _CONVERT_LEADING_OPTIONS = {
     "-w", "--watch", "-s", "--style", "-o", "--output", "--page-size",
     "--margin", "--font", "--code-font", "--wrap-code", "--no-wrap-code",
     "--page-numbers", "--no-page-numbers", "--header", "--footer", "--toc",
-    "--no-toc", "--title", "--author",
+    "--no-toc", "--title", "--author", "--overwrite", "--no-overwrite",
 }
 
 

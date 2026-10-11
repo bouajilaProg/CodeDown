@@ -63,5 +63,4 @@ def get_theme_by_name(name: str) -> Theme:
             return theme
 
     available = ", ".join(t.name for t in get_all_themes())
-    print(f"Error: Unknown theme '{name}'. Available: {available}")
-    sys.exit(1)
+    raise ValueError(f"Unknown theme '{name}'. Available: {available}")

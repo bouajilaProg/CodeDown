@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+from dataclasses import fields
 from pathlib import Path
 from typing import Optional
 
@@ -52,6 +54,20 @@ def _global_options(
     ),
 ):
     return
+
+
+@contextmanager
+def _friendly_errors():
+    try:
+        yield
+    except (ImportError, OSError, UnicodeError, ValueError, RuntimeError) as error:
+        message = str(error)
+        if isinstance(error, ImportError):
+            message += ". Install code-down and its rendering dependencies."
+        elif isinstance(error, UnicodeError):
+            message = "Input Markdown must use UTF-8 encoding."
+        typer.echo(f"Error: {message}", err=True)
+        raise typer.Exit(code=1) from error
 
 
 def _resolve_input_file(input_file: Path) -> Path:
@@ -119,28 +135,44 @@ def convert_command(
     output: Optional[Path] = typer.Option(None, "-o", "--output", autocompletion=complete_paths),
     style: Optional[str] = typer.Option(None, "-s", "--style", autocompletion=complete_themes),
     watch: bool = typer.Option(False, "-w", "--watch", help="Rebuild on changes"),
-    page_size: str = typer.Option("A4", help="A4, A5, Letter, or Legal"),
-    margin: str = typer.Option("20mm", help="Page margin, e.g. 20mm"),
-    font: str = typer.Option("sans-serif", help="Document font family"),
-    code_font: str = typer.Option("monospace", help="Code font family"),
-    wrap_code: bool = typer.Option(True, "--wrap-code/--no-wrap-code"),
-    page_numbers: bool = typer.Option(False, "--page-numbers/--no-page-numbers"),
-    header: str = typer.Option("", help="Page header text"),
-    footer: str = typer.Option("", help="Page footer text"),
-    toc: bool = typer.Option(False, "--toc/--no-toc", help="Include a table of contents"),
-    title: str = typer.Option("", help="PDF title; defaults to input filename"),
-    author: str = typer.Option("", help="PDF author metadata"),
+    page_size: Optional[str] = typer.Option(None, help="A4, A5, Letter, or Legal"),
+    margin: Optional[str] = typer.Option(None, help="Page margin, e.g. 20mm"),
+    font: Optional[str] = typer.Option(None, help="Document font family"),
+    code_font: Optional[str] = typer.Option(None, help="Code font family"),
+    wrap_code: Optional[bool] = typer.Option(None, "--wrap-code/--no-wrap-code"),
+    page_numbers: Optional[bool] = typer.Option(None, "--page-numbers/--no-page-numbers"),
+    header: Optional[str] = typer.Option(None, help="Page header text"),
+    footer: Optional[str] = typer.Option(None, help="Page footer text"),
+    toc: Optional[bool] = typer.Option(None, "--toc/--no-toc", help="Include a table of contents"),
+    title: Optional[str] = typer.Option(None, help="PDF title; defaults to input filename"),
+    author: Optional[str] = typer.Option(None, help="PDF author metadata"),
+    overwrite: Optional[bool] = typer.Option(None, "--overwrite/--no-overwrite", help="Replace an existing PDF (default: overwrite)"),
 ):
     """Convert a Markdown file into a themed PDF."""
-    try:
-        options = RenderOptions(page_size, margin, font, code_font, wrap_code,
-                                page_numbers, header, footer, toc, title, author)
-    except ValueError as error:
-        raise typer.BadParameter(str(error)) from error
-    if watch:
-        _do_watch(input_file, output_location, output, style, options)
-    else:
-        _do_convert(input_file, output_location, output, style, options)
+    from codedown.config import load_config
+    from codedown.themes import get_theme_by_name
+
+    explicit = dict(page_size=page_size, margin=margin, font=font, code_font=code_font,
+                    wrap_code=wrap_code, page_numbers=page_numbers, header=header,
+                    footer=footer, toc=toc, title=title, author=author)
+    with _friendly_errors():
+        input_file = _resolve_input_file(input_file)
+        config = load_config(input_file.parent)
+        settings = {field.name: config[field.name] for field in fields(RenderOptions) if field.name in config}
+        settings.update({key: value for key, value in explicit.items() if value is not None})
+        options = RenderOptions(**settings)
+        theme_name = style if style is not None else config.get("default_theme", "dark")
+        get_theme_by_name(theme_name)
+        output_file = _resolve_output_file(input_file, output_location, output)
+        if output_file.resolve() == input_file.resolve():
+            raise ValueError("Output must be different from the input file")
+        allow_overwrite = overwrite if overwrite is not None else config.get("overwrite", True)
+        if output_file.exists() and not allow_overwrite:
+            raise ValueError(f"Output '{output_file}' exists; use --overwrite to replace it")
+        if watch:
+            _do_watch(input_file, None, output_file, theme_name, options)
+        else:
+            _do_convert(input_file, None, output_file, theme_name, options)
 
 
 def _do_convert(
@@ -157,8 +189,7 @@ def _do_convert(
     input_file = _resolve_input_file(input_file)
 
     output_file = _resolve_output_file(input_file, output_location, output_opt)
-    config = load_config()
-    theme_name = style or config.get("default_theme", "dark")
+    theme_name = style if style is not None else load_config(input_file.parent).get("default_theme", "dark")
 
     markdown_text = input_file.read_text(encoding="utf-8")
     converter = ConverterEngine(markdown_text, input_file, render_options)
@@ -181,8 +212,7 @@ def _do_watch(
     input_file = _resolve_input_file(input_file)
 
     output_file = _resolve_output_file(input_file, output_location, output_opt)
-    config = load_config()
-    theme_name = style or config.get("default_theme", "dark")
+    theme_name = style if style is not None else load_config(input_file.parent).get("default_theme", "dark")
 
     watch_and_convert(input_file, output_file, theme_name, render_options)
 
@@ -193,18 +223,22 @@ def _do_watch(
 @config_app.command("show")
 def config_show():
     """Show current configuration."""
-    from codedown.config import CONFIG_FILE, load_config
+    from codedown.config import CONFIG_FILE, find_project_config, load_config
 
-    config = load_config()
-    if not config:
-        typer.echo("No configuration set. Using defaults.")
-        typer.echo(f"  Config file: {CONFIG_FILE}")
-        typer.echo(f"  default_theme = dark")
-        return
+    with _friendly_errors():
+        config = load_config(Path.cwd())
+        if not config:
+            typer.echo("No configuration set. Using defaults.")
+            typer.echo(f"  Config file: {CONFIG_FILE}")
+            typer.echo(f"  default_theme = dark")
+            return
 
-    typer.echo(f"Config file: {CONFIG_FILE}")
-    for key, value in config.items():
-        typer.echo(f"  {key} = {value}")
+        typer.echo(f"User config: {CONFIG_FILE}")
+        project_file = find_project_config(Path.cwd())
+        if project_file:
+            typer.echo(f"Project config: {project_file}")
+        for key, value in config.items():
+            typer.echo(f"  {key} = {value}")
 
 
 @config_app.command("set-theme")
@@ -217,14 +251,15 @@ def config_set_theme(
     from codedown.config import set_default_theme
     from codedown.themes import get_theme_by_name
 
-    if theme_name is None:
-        _pick_and_set_theme()
-        return
+    with _friendly_errors():
+        if theme_name is None:
+            _pick_and_set_theme()
+            return
 
-    # Validate the theme exists
-    get_theme_by_name(theme_name)
-    set_default_theme(theme_name)
-    typer.echo(f"Default theme set to '{theme_name}'")
+        # Validate the theme exists
+        get_theme_by_name(theme_name)
+        set_default_theme(theme_name)
+        typer.echo(f"Default theme set to '{theme_name}'")
 
 
 def _pick_and_set_theme():
@@ -262,22 +297,23 @@ def themes_command():
 
     from codedown.config import get_default_theme, set_default_theme
 
-    current = get_default_theme()
-    theme_names = _theme_choice_values(current)
+    with _friendly_errors():
+        current = get_default_theme()
+        theme_names = _theme_choice_values(current)
 
-    choices = [{"name": name, "value": name} for name in theme_names]
+        choices = [{"name": name, "value": name} for name in theme_names]
 
-    selected = inquirer.select(
-        message="Pick a theme:",
-        choices=choices,
-        default=current,
-    ).execute()
+        selected = inquirer.select(
+            message="Pick a theme:",
+            choices=choices,
+            default=current,
+        ).execute()
 
-    if selected is None:
-        raise typer.Exit(0)
+        if selected is None:
+            raise typer.Exit(0)
 
-    set_default_theme(selected)
-    typer.echo(f"Default theme set to '{selected}'")
+        set_default_theme(selected)
+        typer.echo(f"Default theme set to '{selected}'")
 
 
 # --- update command ---
@@ -288,4 +324,23 @@ def update_command():
     """Update codeDown to the latest version."""
     from codedown.updater import run_update
 
-    run_update()
+    with _friendly_errors():
+        run_update()
+
+
+@config_app.command("set")
+def config_set(key: str = typer.Argument(..., help="Configuration key"),
+               value: str = typer.Argument(..., help="String value or true/false for booleans")):
+    """Set a validated user default; project config may override it."""
+    from codedown.config import load_config, save_config
+    with _friendly_errors():
+        config = load_config()
+        bool_keys = {"overwrite", "wrap_code", "page_numbers", "toc"}
+        if key in bool_keys:
+            if value not in {"true", "false"}:
+                raise ValueError(f"{key} must be true or false")
+            config[key] = value == "true"
+        else:
+            config[key] = value
+        save_config(config)
+        typer.echo(f"Saved {key} = {config[key]}")

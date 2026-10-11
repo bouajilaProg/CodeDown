@@ -25,9 +25,9 @@ class RenderOptions:
     author: str = ""
 
     def __post_init__(self):
-        if self.page_size not in {"A4", "A5", "Letter", "Legal"}:
+        if not isinstance(self.page_size, str) or self.page_size not in {"A4", "A5", "Letter", "Legal"}:
             raise ValueError("page_size must be A4, A5, Letter, or Legal")
-        if not re.fullmatch(r"(?:\d+(?:\.\d+)?)(?:mm|cm|in|pt|px)", self.margin):
+        if not isinstance(self.margin, str) or not re.fullmatch(r"(?:\d+(?:\.\d+)?)(?:mm|cm|in|pt|px)", self.margin):
             raise ValueError("margin must be a nonnegative length such as 20mm")
         for name in ("font", "code_font", "header", "footer", "title", "author"):
             if not isinstance(getattr(self, name), str):
