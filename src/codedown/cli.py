@@ -50,6 +50,21 @@ def _global_options(
     return
 
 
+def _resolve_input_file(input_file: Path) -> Path:
+    """Prefer an explicit existing path; otherwise resolve a Markdown stem."""
+    if not input_file.exists() and not input_file.suffix:
+        candidate = input_file.with_suffix(".md")
+        if candidate.is_file():
+            input_file = candidate
+    if not input_file.exists():
+        raise typer.BadParameter(f"Input file '{input_file}' does not exist")
+    if not input_file.is_file():
+        raise typer.BadParameter(f"Input path '{input_file}' is not a file")
+    if input_file.suffix and input_file.suffix.lower() not in {".md", ".markdown"}:
+        raise typer.BadParameter("Input must be a Markdown file (.md or .markdown)")
+    return input_file
+
+
 def _resolve_output_file(
     input_file: Path,
     output_arg: Optional[Path],
@@ -126,9 +141,7 @@ def _do_convert(
     from codedown.config import load_config
     from codedown.converter import ConverterEngine
 
-    if not input_file.exists():
-        typer.echo(f"Error: Input file '{input_file}' does not exist", err=True)
-        raise typer.Exit(code=1)
+    input_file = _resolve_input_file(input_file)
 
     output_file = _resolve_output_file(input_file, output_location, output_opt)
     config = load_config()
@@ -151,9 +164,7 @@ def _do_watch(
     from codedown.config import load_config
     from codedown.watcher import watch_and_convert
 
-    if not input_file.exists():
-        typer.echo(f"Error: Input file '{input_file}' does not exist", err=True)
-        raise typer.Exit(code=1)
+    input_file = _resolve_input_file(input_file)
 
     output_file = _resolve_output_file(input_file, output_location, output_opt)
     config = load_config()

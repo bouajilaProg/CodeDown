@@ -163,3 +163,39 @@ def test_convert_positional_output_file(runner, tmp_path, fake_pdf, isolate_conf
     assert result.exit_code == 0
 
     assert out_file.exists()
+
+
+@pytest.mark.parametrize("name", ["notes.md", "my notes.md", "notes.markdown"])
+def test_convert_filename(runner, tmp_path, fake_pdf, isolate_config, name):
+    from codedown.cli import app
+    source = tmp_path / name
+    source.write_text("# Notes", encoding="utf-8")
+    result = runner.invoke(app, ["convert", str(source)])
+    assert result.exit_code == 0, result.output
+    assert source.with_suffix(".pdf").is_file()
+    assert str(source.with_suffix(".pdf")) in result.output
+
+
+def test_stem_resolution_and_existing_path_precedence(tmp_path):
+    from codedown.cli import _resolve_input_file
+    stem = tmp_path / "notes"
+    md = tmp_path / "notes.md"
+    md.write_text("# Markdown", encoding="utf-8")
+    assert _resolve_input_file(stem) == md
+    stem.write_text("# Explicit", encoding="utf-8")
+    assert _resolve_input_file(stem) == stem
+
+
+@pytest.mark.parametrize("kind", ["missing", "directory", "unsupported"])
+def test_invalid_input(runner, tmp_path, isolate_config, kind):
+    from codedown.cli import app
+    source = tmp_path / "input.md"
+    if kind == "directory":
+        source.mkdir()
+    elif kind == "unsupported":
+        source = tmp_path / "input.txt"
+        source.write_text("text", encoding="utf-8")
+    result = runner.invoke(app, ["convert", str(source)])
+    assert result.exit_code == 2
+    assert "Invalid value" in result.output
+    assert not source.with_suffix(".pdf").exists()

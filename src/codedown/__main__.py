@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 
 from codedown.cli import app
 
@@ -25,8 +24,7 @@ def _rewrite_argv_for_implicit_convert(argv: list[str]) -> list[str]:
         return [argv[0], "convert", *argv[1:]]
 
     # Support: code-down file.md
-    p = Path(first)
-    if p.exists() or first.lower().endswith(".md"):
+    if not first.startswith("-"):
         return [argv[0], "convert", *argv[1:]]
 
     return argv

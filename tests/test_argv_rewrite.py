@@ -52,3 +52,10 @@ def test_rewrite_does_not_touch_help_or_version():
         "code-down",
         "--version",
     ]
+
+
+def test_rewrite_extensionless_and_missing_paths():
+    for filename in ("notes", "my notes.md", "missing.txt"):
+        assert _rewrite_argv_for_implicit_convert(["code-down", filename]) == [
+            "code-down", "convert", filename
+        ]
