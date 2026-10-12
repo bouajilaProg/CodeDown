@@ -1,0 +1,22 @@
+:root { --theme-bg:#1a1b26; --theme-text:#c0caf5; --theme-code-bg:#24283b; --theme-border:#3b4261; --theme-link:#7dcfff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--theme-bg); color:var(--theme-text); font:14px system-ui,sans-serif; height:100dvh; display:flex; flex-direction:column; }
+header { padding:14px 20px; border-bottom:1px solid var(--theme-border); display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+strong { font-size:20px; } #filename { margin-left:16px; opacity:.75; }
+nav { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+select,button { color:var(--theme-text); background:var(--theme-code-bg); border:1px solid var(--theme-border); border-radius:6px; padding:7px 10px; font:inherit; }
+button,select { cursor:pointer; } button:hover { border-color:var(--theme-link); }
+:focus-visible { outline:2px solid var(--theme-link); outline-offset:2px; }
+#workspace { --split:50%; flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,var(--split)) 8px minmax(0,1fr); }
+section { display:flex; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
+.pane-title { padding:10px 16px; background:var(--theme-code-bg); display:flex; justify-content:space-between; gap:10px; }
+.pane-title span { opacity:.7; font-size:12px; }
+textarea { resize:none; flex:1; min-height:0; width:100%; border:0; background:var(--theme-bg); color:var(--theme-text); padding:20px; font:14px/1.65 ui-monospace,monospace; tab-size:4; }
+iframe { flex:1; min-height:0; width:100%; border:0; background:var(--theme-bg); }
+#divider { background:var(--theme-border); cursor:col-resize; touch-action:none; } #divider:hover,#divider:focus { background:var(--theme-link); }
+#workspace[data-layout="vertical"] { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,var(--split)) 8px minmax(0,1fr); }
+#workspace[data-layout="vertical"] #divider { cursor:row-resize; }
+#workspace[data-layout="preview"],#workspace[data-layout="editor"] { grid-template-columns:minmax(0,1fr); }
+#workspace[data-layout="preview"] #editor-pane,#workspace[data-layout="editor"] #preview-pane,#workspace[data-layout="preview"] #divider,#workspace[data-layout="editor"] #divider { display:none; }
+footer { padding:8px 20px; border-top:1px solid var(--theme-border); display:flex; justify-content:space-between; gap:12px; font-size:12px; }
+@media(max-width:650px) { header { padding:10px; } nav { gap:6px; } footer span:last-child { display:none; } .pane-title span { display:none; } }

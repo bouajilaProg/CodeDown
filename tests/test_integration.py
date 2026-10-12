@@ -78,10 +78,13 @@ def test_distribution_contains_all_themes(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     with zipfile.ZipFile(next(tmp_path.glob("*.whl"))) as wheel:
         files = set(wheel.namelist())
-        for name in ("light", "dark", "print"):
+        for name in ("light", "dark", "print", "dracula", "nord", "solarized", "github", "gruvbox"):
             assert f"codedown/assets/themes/{name}.toml" in files
             assert f"codedown/assets/themes/{name}.css" in files
         assert "codedown/assets/themes/base.css" in files
         assert "codedown/completion.py" in files
+        assert "codedown/preview.py" in files
+        for name in ("index.html", "workspace.css", "workspace.js"):
+            assert f"codedown/assets/preview/{name}" in files
         entrypoints = next(name for name in files if name.endswith("entry_points.txt"))
         assert b"code-down = codedown.__main__:main" in wheel.read(entrypoints)

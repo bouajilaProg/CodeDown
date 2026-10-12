@@ -3,9 +3,9 @@ import sys
 from codedown.cli import app
 
 
-_SUBCOMMANDS = {"convert", "config", "themes", "update"}
+_SUBCOMMANDS = {"convert", "config", "themes", "update", "preview"}
 _CONVERT_LEADING_OPTIONS = {
-    "-w", "--watch", "-s", "--style", "-o", "--output", "--page-size",
+    "-w", "--watch", "--preview", "-s", "--style", "-o", "--output", "--page-size",
     "--margin", "--font", "--code-font", "--wrap-code", "--no-wrap-code",
     "--page-numbers", "--no-page-numbers", "--header", "--footer", "--toc",
     "--no-toc", "--title", "--author", "--overwrite", "--no-overwrite",

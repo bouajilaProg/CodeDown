@@ -135,6 +135,7 @@ def convert_command(
     output: Optional[Path] = typer.Option(None, "-o", "--output", autocompletion=complete_paths),
     style: Optional[str] = typer.Option(None, "-s", "--style", autocompletion=complete_themes),
     watch: bool = typer.Option(False, "-w", "--watch", help="Rebuild on changes"),
+    preview: bool = typer.Option(False, "--preview", help="Open the live browser workspace instead of creating a PDF"),
     page_size: Optional[str] = typer.Option(None, help="A4, A5, Letter, or Legal"),
     margin: Optional[str] = typer.Option(None, help="Page margin, e.g. 20mm"),
     font: Optional[str] = typer.Option(None, help="Document font family"),
@@ -163,6 +164,12 @@ def convert_command(
         options = RenderOptions(**settings)
         theme_name = style if style is not None else config.get("default_theme", "dark")
         get_theme_by_name(theme_name)
+        if preview:
+            if watch or output_location is not None or output is not None:
+                raise ValueError("--preview cannot be combined with --watch or PDF output paths")
+            from codedown.preview import run_preview
+            run_preview(input_file, theme_name, options)
+            return
         output_file = _resolve_output_file(input_file, output_location, output)
         if output_file.resolve() == input_file.resolve():
             raise ValueError("Output must be different from the input file")
@@ -215,6 +222,24 @@ def _do_watch(
     theme_name = style if style is not None else load_config(input_file.parent).get("default_theme", "dark")
 
     watch_and_convert(input_file, output_file, theme_name, render_options)
+
+
+@app.command("preview")
+def preview_command(
+    input_file: Path = typer.Argument(..., help="Markdown file to preview", autocompletion=complete_markdown),
+    style: Optional[str] = typer.Option(None, "-s", "--style", autocompletion=complete_themes),
+    port: int = typer.Option(0, min=0, max=65535, help="Local port; 0 chooses an available port"),
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="Open the preview in your browser"),
+):
+    """Live preview with code copying and adjustable editor/preview splits."""
+    from codedown.config import load_config
+    from codedown.preview import run_preview
+    with _friendly_errors():
+        input_file = _resolve_input_file(input_file)
+        config = load_config(input_file.parent)
+        settings = {field.name: config[field.name] for field in fields(RenderOptions) if field.name in config}
+        run_preview(input_file, style or config.get("default_theme", "dark"),
+                    RenderOptions(**settings), port, open_browser)
 
 
 # --- config subcommands ---
