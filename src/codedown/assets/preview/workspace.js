@@ -57,6 +57,27 @@ async function copy(text, button) {
   setTimeout(() => { button.textContent = label; }, 1600);
 }
 $('copy-markdown').addEventListener('click', () => copy(editor.value, $('copy-markdown')));
+$('download').addEventListener('click', async () => {
+  const button = $('download');
+  button.disabled = true; button.textContent = 'Downloading…';
+  try {
+    const response = await fetch('/api/download', {
+      method:'POST', headers:{ 'Content-Type':'application/json', 'X-Preview-Token':config.token },
+      body:JSON.stringify({ markdown:editor.value, theme:$('theme').value })
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Could not download preview');
+    }
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement('a');
+    link.href = url; link.download = config.filename.replace(/\.(md|markdown)$/i, '') + '.pdf';
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    $('status').textContent = 'Preview downloaded as PDF';
+  } catch (error) { $('status').textContent = error.message; }
+  finally { button.disabled = false; button.textContent = 'Download preview'; }
+});
 frame.addEventListener('load', () => {
   const doc = frame.contentDocument;
   if (!doc) return;
@@ -102,6 +123,7 @@ async function loadDocument(force = false) {
     if (!response.ok) throw new Error(data.error);
     if (force || (!dirty && data.markdown !== diskText)) {
       diskText = data.markdown; editor.value = diskText; dirty = false; await render();
+      $('download').disabled = false;
     } else if (dirty && data.markdown !== diskText) $('status').textContent = 'Source file changed · Reload file to replace your browser edits';
   } catch (error) { $('status').textContent = error.message; }
 }

@@ -1,3 +1,5 @@
+import base64
+from io import BytesIO
 import json
 import re
 from threading import Thread
@@ -5,9 +7,11 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 import pytest
+from pypdf import PdfReader
 from typer.testing import CliRunner
 
 from codedown.preview import create_preview_server
+from codedown.converter import RenderOptions
 from codedown.themes import get_all_themes
 
 
@@ -16,7 +20,7 @@ def preview(tmp_path):
     source = tmp_path / "notes.md"
     source.write_text("# Preview\n\n```python\nprint('hello')\n```", encoding="utf-8")
     (tmp_path / "image.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
-    server = create_preview_server(source)
+    server = create_preview_server(source, options=RenderOptions(title="Preview export", page_size="Letter"))
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
@@ -47,7 +51,8 @@ def test_render_and_source_reload(preview):
         assert response.headers["Content-Type"] == "image/svg+xml"
 
 
-def test_preview_rejects_traversal_and_unauthorized_render(preview, tmp_path):
+@pytest.mark.parametrize("endpoint", ["render", "download"])
+def test_preview_rejects_traversal_and_unauthorized_render(preview, tmp_path, endpoint):
     url, source = preview
     outside = tmp_path.parent / "outside-preview.txt"
     outside.write_text("private")
@@ -57,8 +62,61 @@ def test_preview_rejects_traversal_and_unauthorized_render(preview, tmp_path):
             urlopen(url + route)
         assert error.value.code == 404
     with pytest.raises(HTTPError) as error:
-        urlopen(Request(url + "/api/render", data=b'{}'))
+        urlopen(Request(url + "/api/" + endpoint, data=b'{}'))
     assert error.value.code == 403
+
+
+def test_download_pdf_uses_browser_edits_theme_options_and_local_images(preview, monkeypatch):
+    import weasyprint
+    url, source = preview
+    original = source.read_bytes()
+    existing_pdf = source.with_suffix(".pdf")
+    existing_pdf.write_bytes(b"existing output")
+    (source.parent / "pixel.png").write_bytes(base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS1sAAAAASUVORK5CYII="))
+    with urlopen(url) as response:
+        config = json.loads(re.search(r'<script id="config" type="application/json">(.*?)</script>', response.read().decode())[1])
+    html_class = weasyprint.HTML
+    rendered = {}
+
+    def capture_html(**kwargs):
+        rendered.update(kwargs)
+        return html_class(**kwargs)
+
+    monkeypatch.setattr(weasyprint, "HTML", capture_html)
+    markdown = "# Unsaved résumé\n\n![Local image](pixel.png)\n\n```python\nprint(42)\n```"
+    request = Request(url + "/api/download", data=json.dumps(dict(markdown=markdown, theme="nord")).encode(),
+                      headers={"X-Preview-Token": config["token"]})
+    with urlopen(request) as response:
+        assert response.headers["Content-Type"] == "application/pdf"
+        pdf = PdfReader(BytesIO(response.read()))
+    assert "Unsaved résumé" in pdf.pages[0].extract_text()
+    assert "42" in pdf.pages[0].extract_text()
+    assert pdf.metadata.title == "Preview export"
+    assert float(pdf.pages[0].mediabox.width) == pytest.approx(612)
+    assert list(pdf.pages[0].images)
+    assert "#2e3440" in rendered["string"]
+    assert "copy-code" not in rendered["string"]
+    assert source.read_bytes() == original
+    assert existing_pdf.read_bytes() == b"existing output"
+
+
+def test_download_reports_export_errors(preview, monkeypatch):
+    import weasyprint
+    url, _ = preview
+    with urlopen(url) as response:
+        config = json.loads(re.search(r'<script id="config" type="application/json">(.*?)</script>', response.read().decode())[1])
+
+    def fail_export(self):
+        raise RuntimeError("Renderer unavailable")
+
+    monkeypatch.setattr(weasyprint.HTML, "write_pdf", fail_export)
+    request = Request(url + "/api/download", data=b'{"markdown":"# Export"}',
+                      headers={"X-Preview-Token": config["token"]})
+    with pytest.raises(HTTPError) as error:
+        urlopen(request)
+    assert error.value.code == 500
+    assert "Renderer unavailable" in json.load(error.value)["error"]
 
 
 @pytest.mark.parametrize("args", [["preview", "--no-open"], ["--preview"], ["convert", "--preview"]])

@@ -61,7 +61,7 @@ def create_preview_server(source: Path, style: str = "dark",
                 self.respond(dict(error=str(error)), status=400)
 
         def do_POST(self):
-            if self.path != "/api/render":
+            if self.path not in {"/api/render", "/api/download"}:
                 self.respond(dict(error="Not found"), status=404)
                 return
             if self.headers.get("X-Preview-Token") != token:
@@ -77,6 +77,11 @@ def create_preview_server(source: Path, style: str = "dark",
                 theme = get_theme_by_name(data.get("theme", style))
                 engine = ConverterEngine(data["markdown"], source, options)
                 html = engine.apply_theme(engine.convert_to_html(), theme)
+                if self.path == "/api/download":
+                    from weasyprint import HTML
+                    pdf = HTML(string=html, base_url=str(source.parent)).write_pdf()
+                    self.respond(pdf, "application/pdf")
+                    return
                 html = html.replace("<head>", '<head><base href="/assets/">', 1)
                 # Screen padding must override PDF layout settings only in the preview.
                 html = html.replace("</head>", '<style>@media screen { body { padding: 24px; } }'
@@ -84,6 +89,8 @@ def create_preview_server(source: Path, style: str = "dark",
                 self.respond(dict(html=html, css=theme.get_css()))
             except (ValueError, TypeError, AttributeError) as error:
                 self.respond(dict(error=str(error)), status=400)
+            except (ImportError, OSError, RuntimeError) as error:
+                self.respond(dict(error=f"Could not export preview: {error}"), status=500)
 
     return ThreadingHTTPServer(("127.0.0.1", port), Handler)
 

@@ -6,6 +6,7 @@ strong { font-size:20px; } #filename { margin-left:16px; opacity:.75; }
 nav { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 select,button { color:var(--theme-text); background:var(--theme-code-bg); border:1px solid var(--theme-border); border-radius:6px; padding:7px 10px; font:inherit; }
 button,select { cursor:pointer; } button:hover { border-color:var(--theme-link); }
+button:disabled { cursor:wait; opacity:.6; }
 :focus-visible { outline:2px solid var(--theme-link); outline-offset:2px; }
 #workspace { --split:50%; flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,var(--split)) 8px minmax(0,1fr); }
 section { display:flex; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
