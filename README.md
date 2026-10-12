@@ -17,8 +17,9 @@ Built for developers who love clean documentation, readable code snippets, and a
 *  **Direct filenames** – `code-down notes.md` or `code-down notes`
 *  **Shell Autocomplete** – run `code-down --install-completion` from Bash, Zsh, or Fish
 *  **Syntax Highlighting** for code blocks
-*  **Selectable Themes** – interactive picker or CLI flag (`light`, `dark`, `print`)
+*  **Selectable Themes** – interactive picker or CLI flag (`light`, `dark`, `print`, `dracula`, `nord`, `solarized`, `github`, `gruvbox`)
 *  **PDF Layout** – print theme, page sizes, fonts, contents, headers, and metadata
+*  **Browser Preview** – live Markdown editing, code-copy buttons, and resizable split views
 *  **Watch Mode** – auto-regenerate PDF on file save
 *  **Self-Update** – update from the CLI (`code-down update`)
 *  **Configurable** – set a default theme via `code-down config set-theme`
@@ -64,12 +65,28 @@ Automatically rebuild the PDF when the Markdown file changes:
 code-down -w input.md
 ```
 
+### Browser preview
+
+```bash
+code-down preview notes.md -s nord
+code-down notes.md --preview
+code-down preview notes.md --no-open --port 8080
+```
+
+Choose side-by-side, stacked, preview-only, or editor-only views. Drag the
+split divider or use its arrow keys; double-click it to reset. Copy individual
+code blocks with **Copy code**, or the whole document with **Copy Markdown**.
+Browser edits do not change your source file. External file changes refresh the
+preview automatically when there are no browser edits. Use **Reload file** to
+replace browser edits with the file. Press Ctrl+C in the terminal to stop.
+
 ### Options
 
 | Flag              | Description                             | Default                             |
 | ----------------- | --------------------------------------- | ----------------------------------- |
 | `-o, --output`    | Output PDF file path                    | Same as input with `.pdf` extension |
-| `-s, --style`     | Theme style (`light`, `dark`, `print`)      | Config default or `dark`            |
+| `-s, --style`     | Theme style (`light`, `dark`, `print`, `dracula`, `nord`, `solarized`, `github`, `gruvbox`)      | Config default or `dark`            |
+| `--preview`      | Open the browser preview workspace      |                                     |
 | `-w, --watch`     | Watch file and rebuild PDF on changes   |                                     |
 | `-v, --version`   | Print version and exit                  |                                     |
 
@@ -77,6 +94,7 @@ code-down -w input.md
 
 | Command              | Description                                   |
 | -------------------- | --------------------------------------------- |
+| `code-down preview input.md` | Open the live preview workspace          |
 | `code-down themes`   | Pick a theme interactively (sets as default)   |
 | `code-down config show` | Show current configuration                 |
 | `code-down config set-theme` | Set the default theme (interactive or by name) |
