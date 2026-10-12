@@ -1,0 +1,4 @@
+name = "dracula"
+css_file = "dracula.css"
+code_theme = "dracula"
+version = "1.0.0"

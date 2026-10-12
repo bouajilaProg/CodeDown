@@ -1,0 +1,4 @@
+name = "github"
+css_file = "github.css"
+code_theme = "friendly"
+version = "1.0.0"

@@ -1,0 +1,4 @@
+name = "gruvbox"
+css_file = "gruvbox.css"
+code_theme = "gruvbox-dark"
+version = "1.0.0"

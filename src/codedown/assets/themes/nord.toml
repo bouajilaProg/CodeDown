@@ -1,0 +1,4 @@
+name = "nord"
+css_file = "nord.css"
+code_theme = "nord"
+version = "1.0.0"

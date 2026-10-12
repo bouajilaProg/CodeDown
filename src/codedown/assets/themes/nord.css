@@ -1,0 +1,15 @@
+:root {
+  --theme-bg: #2e3440;
+  --theme-text: #eceff4;
+  --theme-header: #88c0d0;
+  --theme-link: #8fbcbb;
+  --theme-border: #4c566a;
+  --theme-hr-border: #4c566a;
+  --theme-code-bg: #3b4252;
+  --theme-code-shadow: transparent;
+  --theme-blockquote-bg: #3b4252;
+  --theme-blockquote-border: #88c0d0;
+  --theme-blockquote-text: #d8dee9;
+  --theme-table-header-bg: #3b4252;
+  --theme-table-header-text: #88c0d0;
+}

@@ -1,0 +1,4 @@
+name = "solarized"
+css_file = "solarized.css"
+code_theme = "solarized-light"
+version = "1.0.0"
