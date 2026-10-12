@@ -76,6 +76,8 @@ code-down preview notes.md --no-open --port 8080
 Choose side-by-side, stacked, preview-only, or editor-only views. Drag the
 split divider or use its arrow keys; double-click it to reset. Copy individual
 code blocks with **Copy code**, or the whole document with **Copy Markdown**.
+Use **Download preview** to export a PDF with your current browser edits and
+selected theme, including configured PDF layout settings and local images.
 Browser edits do not change your source file. External file changes refresh the
 preview automatically when there are no browser edits. Use **Reload file** to
 replace browser edits with the file. Press Ctrl+C in the terminal to stop.
@@ -150,6 +152,23 @@ code-down --install-completion # run from Bash, Zsh, or Fish; restart the shell
 
 Completion suggests commands, Markdown files, directories, options, and themes.
 Use `code-down --show-completion` to inspect the generated shell script.
+
+Autocomplete also covers preview filenames and options, all eight themes,
+page sizes, configuration keys, and matching setting values:
+
+```text
+code-down preview notes.md --style <Tab>
+code-down notes.md --page-size <Tab>
+code-down config set <Tab>
+code-down config set wrap_code <Tab>
+```
+
+Upgrade to 3.0.1 and refresh completion:
+
+```bash
+python -m pip install --upgrade code-down
+code-down --install-completion
+```
 
 ## PDF layout and project defaults
 

@@ -65,6 +65,8 @@ code-down preview notes.md --no-open --port 8080
 
 The local workspace renders Markdown as you type and includes a **Copy code**
 button for every code block and a **Copy Markdown** toolbar button. Choose
+**Download preview** to save the current document as a PDF using your browser
+edits, selected theme, configured layout settings, and local images. Choose
 **Side by side**, **Stacked**, **Preview only**, or **Editor only**. Drag the
 split divider, or focus it and use the arrow keys. Double-click the divider or
 use **Reset split** to restore equal panes. Split size and view are remembered
