@@ -54,3 +54,27 @@ def test_completion_script(shell, monkeypatch):
     result = CliRunner().invoke(app, ["--show-completion", shell])
     assert result.exit_code == 0, result.output
     assert "code-down" in result.output
+
+
+@pytest.mark.parametrize("shell", ["bash", "zsh", "fish"])
+@pytest.mark.parametrize("words, expected", [
+    ('code-down pre', 'preview'),
+    ('code-down preview no', 'notes.md'),
+    ('code-down preview notes.md --no', '--no-open'),
+    ('code-down preview notes.md --style no', 'nord'),
+    ('code-down notes.md --pre', '--preview'),
+    ('code-down notes.md --page-size L', 'Letter'),
+    ('code-down config set def', 'default_theme'),
+    ('code-down config set default_theme gr', 'gruvbox'),
+    ('code-down config set page_size A', 'A4'),
+    ('code-down config set wrap_code f', 'false'),
+    ('code-down config set font mo', 'monospace'),
+])
+def test_preview_and_setting_completion(tmp_path, words, expected, shell, monkeypatch):
+    (tmp_path / 'notes.md').write_text('# Notes', encoding='utf-8')
+    config_dir = tmp_path / 'config'
+    monkeypatch.setenv('XDG_CONFIG_HOME', str(config_dir))
+    # Completion must never launch the preview, render a PDF, or write settings.
+    assert expected in complete(tmp_path, words, shell)
+    assert not list(tmp_path.glob('*.pdf'))
+    assert not config_dir.exists()

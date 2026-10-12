@@ -41,6 +41,32 @@ def complete_themes(incomplete: str) -> list[str]:
                   if theme.name.lower().startswith(incomplete.lower()))
 
 
+def complete_page_sizes(incomplete: str) -> list[str]:
+    return [size for size in ("A4", "A5", "Letter", "Legal")
+            if size.lower().startswith(incomplete.lower())]
+
+
+def complete_config_keys(incomplete: str) -> list[str]:
+    from dataclasses import fields
+    from codedown.converter import RenderOptions
+    keys = {field.name for field in fields(RenderOptions)} | {"default_theme", "overwrite"}
+    return sorted(key for key in keys if key.startswith(incomplete))
+
+
+def complete_config_values(ctx, incomplete: str) -> list[str]:
+    key = ctx.params.get("key")
+    if key == "default_theme":
+        return complete_themes(incomplete)
+    if key == "page_size":
+        return complete_page_sizes(incomplete)
+    choices = []
+    if key in {"overwrite", "wrap_code", "page_numbers", "toc"}:
+        choices = ["true", "false"]
+    elif key in {"font", "code_font"}:
+        choices = ["sans-serif", "serif", "monospace"]
+    return [value for value in choices if value.startswith(incomplete)]
+
+
 class ShortcutGroup(TyperGroup):
     def parse_args(self, ctx, args):
         from codedown.__main__ import _rewrite_argv_for_implicit_convert

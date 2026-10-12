@@ -21,7 +21,28 @@ code-down no<Tab>
 code-down notes.md --style <Tab>
 code-down convert notes.md --output <Tab>
 code-down config set-theme <Tab>
+code-down preview no<Tab>
+code-down preview notes.md --style <Tab>
+code-down notes.md --page-size <Tab>
+code-down config set <Tab>
+code-down config set default_theme <Tab>
+code-down config set wrap_code <Tab>
 ```
 
 Completion only reads filenames and the theme registry; it does not render PDFs
 or save configuration. Quote paths containing spaces when entering them manually.
+
+Preview completion includes Markdown files, all eight themes, and options such
+as `--no-open` and `--port`. Configuration completion suggests validated keys,
+theme names, page sizes, boolean values, and standard font families.
+
+To choose a shell explicitly:
+
+```bash
+code-down --install-completion bash
+code-down --install-completion zsh
+code-down --install-completion fish
+```
+
+After upgrading, reinstall completion and restart your shell to refresh its
+script. Completion is available in both the pip package and standalone binary.

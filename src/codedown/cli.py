@@ -7,6 +7,7 @@ import typer
 
 from codedown.converter import RenderOptions
 from codedown.completion import ShortcutGroup, complete_markdown, complete_paths, complete_themes
+from codedown.completion import complete_page_sizes, complete_config_keys, complete_config_values
 
 
 def _get_package_version() -> str:
@@ -136,7 +137,7 @@ def convert_command(
     style: Optional[str] = typer.Option(None, "-s", "--style", autocompletion=complete_themes),
     watch: bool = typer.Option(False, "-w", "--watch", help="Rebuild on changes"),
     preview: bool = typer.Option(False, "--preview", help="Open the live browser workspace instead of creating a PDF"),
-    page_size: Optional[str] = typer.Option(None, help="A4, A5, Letter, or Legal"),
+    page_size: Optional[str] = typer.Option(None, help="A4, A5, Letter, or Legal", autocompletion=complete_page_sizes),
     margin: Optional[str] = typer.Option(None, help="Page margin, e.g. 20mm"),
     font: Optional[str] = typer.Option(None, help="Document font family"),
     code_font: Optional[str] = typer.Option(None, help="Code font family"),
@@ -354,8 +355,8 @@ def update_command():
 
 
 @config_app.command("set")
-def config_set(key: str = typer.Argument(..., help="Configuration key"),
-               value: str = typer.Argument(..., help="String value or true/false for booleans")):
+def config_set(key: str = typer.Argument(..., help="Configuration key", autocompletion=complete_config_keys),
+               value: str = typer.Argument(..., help="String value or true/false for booleans", autocompletion=complete_config_values)):
     """Set a validated user default; project config may override it."""
     from codedown.config import load_config, save_config
     with _friendly_errors():
